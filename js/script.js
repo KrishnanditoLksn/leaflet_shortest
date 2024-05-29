@@ -1,18 +1,47 @@
-let map = L.map('map').setView([-7.446807105538364, 111.03517857509681  ], 13);
+let map = L.map('map').setView([-7.446807105538364, 111.03517857509681], 13);
+let latLongitude1 = L.latLng(-7.446807105538364, 111.03517857509681)
+let latLongitude2 = L.latLng(-7.4435851388004215, 111.04131074421484)
 
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+//create waypoint
+let waypoint1 = new L.Routing.Waypoint(latLongitude1)
+let waypoint2 = new L.Routing.Waypoint(latLongitude2)
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
 }).addTo(map);
 
 
-L.marker([-7.446807105538364, 111.03517857509681]).addTo(map)
-    .bindPopup('A pretty CSS popup.<br> Easily customizable.')
-    .openPopup();
+
 
 L.Routing.control({
     waypoints: [
-        L.latLng(-7.446807105538364, 111.03517857509681),
-        L.latLng(-7.4435851388004215, 111.04131074421484)
+        latLongitude1, latLongitude2
     ],
-    routeWhileDragging: true
+    routeWhileDragging: true,
 }).addTo(map);
+
+let route = L.Routing.osrmv1();
+
+route.route([waypoint1, waypoint2], (err, routes) => {
+    if (!err) {
+        let bestCalc = 1000000000000
+        let bestRoute = 0
+
+        for (let i in routes) {
+            if (routes[i].summary.totalDistance < bestCalc) {
+                bestRoute = i
+                bestCalc = routes[i].summary.totalDistance
+            }
+        }
+        // L.Routing.line(routes[bestRoute], {
+        //     styles:[
+        //         {
+        //             color:'green',
+        //             weight:'10  '
+        //         }
+        //     ]
+        // }).addTo(map)
+
+        console.log('best route', routes[bestRoute])
+    }
+})
